@@ -1,0 +1,1082 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#667eea">
+    <title>简单减肥日志</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23667eea'/><text x='50' y='65' font-size='50' text-anchor='middle' fill='white'>⚖️</text></svg>">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px 15px;
+            padding-top: calc(20px + env(safe-area-inset-top));
+            padding-bottom: calc(20px + env(safe-area-inset-bottom));
+        }
+
+        /* 启动画面 */
+        .splash-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease;
+        }
+
+        .splash-screen.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .splash-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+            animation: bounce 1s ease infinite;
+        }
+
+        .splash-title {
+            font-size: 28px;
+            font-weight: bold;
+            color: white;
+            margin-bottom: 10px;
+        }
+
+        .splash-subtitle {
+            font-size: 16px;
+            color: rgba(255,255,255,0.8);
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 25px;
+        }
+
+        .header h1 {
+            font-size: 26px;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 16px;
+            padding: 18px 15px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .stat-card .label {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 6px;
+        }
+
+        .stat-card .value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .stat-card .unit {
+            font-size: 14px;
+            color: #999;
+            margin-left: 2px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 20px 18px;
+            margin-bottom: 18px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .card-title {
+            font-size: 17px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .form-group {
+            margin-bottom: 14px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            color: #555;
+            margin-bottom: 6px;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1.5px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 15px;
+            font-family: inherit;
+            transition: border-color 0.3s;
+            -webkit-appearance: none;
+            background: white;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.1s, box-shadow 0.3s;
+            font-family: inherit;
+        }
+
+        .btn:active {
+            transform: scale(0.97);
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .btn-danger {
+            background: #fee;
+            color: #e74c3c;
+        }
+
+        .btn-small {
+            padding: 8px 14px;
+            font-size: 13px;
+            width: auto;
+            display: inline-block;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 220px;
+        }
+
+        /* 历史记录卡片式 */
+        .records-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .record-card {
+            background: #fafafa;
+            border-radius: 12px;
+            padding: 14px;
+            border-left: 4px solid #667eea;
+        }
+
+        .record-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .record-date {
+            font-size: 14px;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .record-weight {
+            font-size: 20px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .record-weight .unit {
+            font-size: 13px;
+            color: #999;
+            font-weight: normal;
+        }
+
+        .record-details {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .record-tag {
+            font-size: 12px;
+            padding: 3px 8px;
+            background: #e8f0fe;
+            color: #667eea;
+            border-radius: 6px;
+        }
+
+        .record-note {
+            font-size: 13px;
+            color: #777;
+            line-height: 1.5;
+        }
+
+        .record-actions {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 8px;
+        }
+
+        .delete-btn {
+            background: none;
+            border: none;
+            color: #e74c3c;
+            font-size: 13px;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-family: inherit;
+        }
+
+        .delete-btn:active {
+            background: #fee;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 30px 20px;
+            color: #999;
+        }
+
+        .empty-state .icon {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+
+        .tips-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        .tip-item {
+            background: linear-gradient(135deg, #f5f7fa 0%, #e8ecf1 100%);
+            padding: 12px 10px;
+            border-radius: 10px;
+            text-align: center;
+            font-size: 12px;
+            color: #555;
+            line-height: 1.4;
+        }
+
+        .tip-item .emoji {
+            font-size: 20px;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .actions-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 16px;
+            padding: 25px 20px;
+            width: 100%;
+            max-width: 340px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 16px;
+            color: #333;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .achievement {
+            text-align: center;
+            padding: 10px 0;
+        }
+
+        .achievement .trophy {
+            font-size: 60px;
+            margin-bottom: 10px;
+            animation: pulse 0.6s ease;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(0); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+
+        .achievement h3 {
+            font-size: 20px;
+            color: #f39c12;
+            margin-bottom: 8px;
+        }
+
+        .achievement p {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .target-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            background: #f0f7ff;
+            border-radius: 10px;
+            margin-bottom: 14px;
+        }
+
+        .target-info .text {
+            font-size: 14px;
+            color: #555;
+        }
+
+        .target-info .target-weight {
+            font-size: 18px;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 8px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+            .no-print {
+                display: none !important;
+            }
+            .card {
+                box-shadow: none;
+                border: 1px solid #ddd;
+                page-break-inside: avoid;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 启动画面 -->
+    <div class="splash-screen" id="splashScreen">
+        <div class="splash-icon">⚖️</div>
+        <div class="splash-title">简单减肥日志</div>
+        <div class="splash-subtitle">记录你的减肥之旅</div>
+    </div>
+
+    <div class="container">
+        <div class="header">
+            <h1>🏃‍♂️ 简单减肥日志</h1>
+            <p>每天记录一点点，见证大变化</p>
+        </div>
+
+        <!-- 统计卡片 -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="label">当前体重</div>
+                <div class="value" id="currentWeight">--<span class="unit">kg</span></div>
+            </div>
+            <div class="stat-card">
+                <div class="label">累计减重</div>
+                <div class="value" id="totalLoss">--<span class="unit">kg</span></div>
+            </div>
+            <div class="stat-card">
+                <div class="label">记录天数</div>
+                <div class="value" id="recordDays">--<span class="unit">天</span></div>
+            </div>
+            <div class="stat-card">
+                <div class="label">日均减重</div>
+                <div class="value" id="avgLoss">--<span class="unit">kg</span></div>
+            </div>
+        </div>
+
+        <!-- 记录体重 -->
+        <div class="card">
+            <div class="card-title">📝 记录今日体重</div>
+            
+            <div id="targetSection" style="display: none;">
+                <div class="target-info">
+                    <div>
+                        <div class="text">目标体重</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    <div class="target-weight" id="targetWeightDisplay">-- kg</div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>体重 (kg)</label>
+                <input type="number" id="weightInput" step="0.1" placeholder="请输入体重" inputmode="decimal">
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label>日期</label>
+                    <input type="date" id="dateInput">
+                </div>
+                <div class="form-group">
+                    <label>时间</label>
+                    <input type="time" id="timeInput">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>心情</label>
+                    <select id="moodInput">
+                        <option value="😊 开心">😊 开心</option>
+                        <option value="😐 一般">😐 一般</option>
+                        <option value="😔 低落">😔 低落</option>
+                        <option value="💪 充满斗志">💪 充满斗志</option>
+                        <option value="😫 疲惫">😫 疲惫</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>饮水量</label>
+                    <select id="waterInput">
+                        <option value="💧 少">💧 少</option>
+                        <option value="💧💧 适中" selected>💧💧 适中</option>
+                        <option value="💧💧💧 充足">💧💧💧 充足</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>备注 (可选)</label>
+                <textarea id="noteInput" rows="2" placeholder="今天吃了什么？运动了吗？"></textarea>
+            </div>
+
+            <button class="btn" onclick="addRecord()">✅ 保存记录</button>
+        </div>
+
+        <!-- 体重趋势图 -->
+        <div class="card">
+            <div class="card-title">📈 体重变化趋势</div>
+            <div class="chart-container">
+                <canvas id="weightChart"></canvas>
+            </div>
+        </div>
+
+        <!-- 历史记录 -->
+        <div class="card">
+            <div class="card-title">📋 历史记录</div>
+            <div id="recordsList" class="records-list">
+                <div class="empty-state">
+                    <div class="icon">📝</div>
+                    <div>还没有记录，开始你的第一天吧！</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 健康小贴士 -->
+        <div class="card">
+            <div class="card-title">💡 健康小贴士</div>
+            <div class="tips-grid">
+                <div class="tip-item">
+                    <span class="emoji">💧</span>
+                    每天喝够8杯水
+                </div>
+                <div class="tip-item">
+                    <span class="emoji">🥗</span>
+                    多吃蔬菜水果
+                </div>
+                <div class="tip-item">
+                    <span class="emoji">🏃</span>
+                    坚持运动30分钟
+                </div>
+                <div class="tip-item">
+                    <span class="emoji">😴</span>
+                    早睡早起不熬夜
+                </div>
+                <div class="tip-item">
+                    <span class="emoji">🍚</span>
+                    每餐七分饱最好
+                </div>
+                <div class="tip-item">
+                    <span class="emoji">🚫</span>
+                    少吃零食奶茶
+                </div>
+            </div>
+        </div>
+
+        <!-- 操作按钮 -->
+        <div class="card no-print">
+            <div class="card-title">⚙️ 更多操作</div>
+            <div class="actions-grid">
+                <button class="btn btn-secondary btn-small" onclick="setTarget()">🎯 设置目标</button>
+                <button class="btn btn-secondary btn-small" onclick="exportData()">📤 导出数据</button>
+                <button class="btn btn-secondary btn-small" onclick="importData()">📥 导入数据</button>
+                <button class="btn btn-secondary btn-small" onclick="window.print()">🖨️ 打印</button>
+                <button class="btn btn-danger btn-small" onclick="clearAll()">🗑️ 清空所有</button>
+            </div>
+            <input type="file" id="importFile" accept=".json" style="display: none" onchange="handleImport(event)">
+        </div>
+    </div>
+
+    <!-- 成就弹窗 -->
+    <div class="modal" id="achievementModal">
+        <div class="modal-content achievement">
+            <div class="trophy" id="achievementIcon">🏆</div>
+            <h3 id="achievementTitle">恭喜你！</h3>
+            <p id="achievementDesc">你完成了一个小目标！</p>
+            <div class="modal-actions">
+                <button class="btn" onclick="closeModal('achievementModal')">太棒了！</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 设置目标弹窗 -->
+    <div class="modal" id="targetModal">
+        <div class="modal-content">
+            <div class="modal-title">🎯 设置目标体重</div>
+            <div class="form-group">
+                <label>目标体重 (kg)</label>
+                <input type="number" id="targetWeightInput" step="0.1" placeholder="请输入目标体重" inputmode="decimal">
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="closeModal('targetModal')">取消</button>
+                <button class="btn" onclick="saveTarget()">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 确认弹窗 -->
+    <div class="modal" id="confirmModal">
+        <div class="modal-content">
+            <div class="modal-title" id="confirmTitle">确认</div>
+            <p id="confirmMessage" style="color: #666; margin-bottom: 10px;">确定要执行此操作吗？</p>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="closeModal('confirmModal')">取消</button>
+                <button class="btn btn-danger" id="confirmBtn">确定</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 数据存储
+        let records = JSON.parse(localStorage.getItem('weightRecords') || '[]');
+        let targetWeight = parseFloat(localStorage.getItem('targetWeight') || '0');
+        let chart = null;
+
+        // 初始化
+        window.onload = function() {
+            // 隐藏启动画面
+            setTimeout(() => {
+                document.getElementById('splashScreen').classList.add('hidden');
+            }, 800);
+
+            // 设置默认日期时间
+            const now = new Date();
+            document.getElementById('dateInput').value = now.toISOString().split('T')[0];
+            document.getElementById('timeInput').value = now.toTimeString().slice(0, 5);
+
+            // 注册 Service Worker
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('sw.js').catch(err => {
+                    console.log('SW registration failed');
+                });
+            }
+
+            updateStats();
+            updateRecordsList();
+            initChart();
+            updateTargetDisplay();
+        };
+
+        // 添加记录
+        function addRecord() {
+            const weight = parseFloat(document.getElementById('weightInput').value);
+            const date = document.getElementById('dateInput').value;
+            const time = document.getElementById('timeInput').value;
+            const mood = document.getElementById('moodInput').value;
+            const water = document.getElementById('waterInput').value;
+            const note = document.getElementById('noteInput').value.trim();
+
+            if (!weight || !date || !time) {
+                alert('请填写体重、日期和时间');
+                return;
+            }
+
+            const record = {
+                id: Date.now(),
+                weight: weight,
+                date: date,
+                time: time,
+                mood: mood,
+                water: water,
+                note: note
+            };
+
+            // 检查是否已有同一天的记录
+            const existingIndex = records.findIndex(r => r.date === date);
+            if (existingIndex >= 0) {
+                if (confirm('今天已经有记录了，要更新吗？')) {
+                    records[existingIndex] = record;
+                } else {
+                    return;
+                }
+            } else {
+                records.push(record);
+            }
+
+            // 按日期排序
+            records.sort((a, b) => new Date(b.date) - new Date(a.date));
+            saveData();
+            updateStats();
+            updateRecordsList();
+            updateChart();
+            updateTargetDisplay();
+
+            // 清空输入
+            document.getElementById('weightInput').value = '';
+            document.getElementById('noteInput').value = '';
+
+            // 检查成就
+            checkAchievements(weight);
+        }
+
+        // 删除记录
+        function deleteRecord(id) {
+            showConfirm('删除记录', '确定要删除这条记录吗？', () => {
+                records = records.filter(r => r.id !== id);
+                saveData();
+                updateStats();
+                updateRecordsList();
+                updateChart();
+                updateTargetDisplay();
+            });
+        }
+
+        // 更新统计
+        function updateStats() {
+            if (records.length === 0) {
+                document.getElementById('currentWeight').innerHTML = '--<span class="unit">kg</span>';
+                document.getElementById('totalLoss').innerHTML = '--<span class="unit">kg</span>';
+                document.getElementById('recordDays').innerHTML = '--<span class="unit">天</span>';
+                document.getElementById('avgLoss').innerHTML = '--<span class="unit">kg</span>';
+                return;
+            }
+
+            const sorted = [...records].sort((a, b) => new Date(a.date) - new Date(b.date));
+            const current = sorted[sorted.length - 1].weight;
+            const first = sorted[0].weight;
+            const days = records.length;
+            const totalLoss = (first - current).toFixed(1);
+            const avgLoss = (totalLoss / days).toFixed(2);
+
+            document.getElementById('currentWeight').innerHTML = current + '<span class="unit">kg</span>';
+            document.getElementById('totalLoss').innerHTML = 
+                (totalLoss >= 0 ? '-' : '+') + Math.abs(totalLoss) + '<span class="unit">kg</span>';
+            document.getElementById('recordDays').innerHTML = days + '<span class="unit">天</span>';
+            document.getElementById('avgLoss').innerHTML = 
+                (avgLoss >= 0 ? '-' : '+') + Math.abs(avgLoss) + '<span class="unit">kg</span>';
+
+            // 累计减重颜色
+            const totalLossEl = document.querySelector('#totalLoss');
+            if (totalLoss > 0) {
+                totalLossEl.style.color = '#27ae60';
+            } else if (totalLoss < 0) {
+                totalLossEl.style.color = '#e74c3c';
+            }
+        }
+
+        // 更新记录列表（卡片式）
+        function updateRecordsList() {
+            const container = document.getElementById('recordsList');
+            
+            if (records.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="icon">📝</div>
+                        <div>还没有记录，开始你的第一天吧！</div>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+            const sorted = [...records].sort((a, b) => new Date(b.date) - new Date(a.date));
+            const sortedAsc = [...records].sort((a, b) => new Date(a.date) - new Date(b.date));
+
+            sorted.forEach((record, index) => {
+                const prevIndex = sortedAsc.findIndex(r => r.id === record.id);
+                let changeText = '';
+                let changeColor = '#999';
+                
+                if (prevIndex > 0) {
+                    const prev = sortedAsc[prevIndex - 1].weight;
+                    const diff = (record.weight - prev).toFixed(1);
+                    if (diff > 0) {
+                        changeText = `↑${diff}kg`;
+                        changeColor = '#e74c3c';
+                    } else if (diff < 0) {
+                        changeText = `↓${Math.abs(diff)}kg`;
+                        changeColor = '#27ae60';
+                    } else {
+                        changeText = '→ 不变';
+                    }
+                }
+
+                html += `
+                    <div class="record-card">
+                        <div class="record-header">
+                            <span class="record-date">${record.date} ${record.time}</span>
+                            <span class="record-weight">${record.weight}<span class="unit">kg</span></span>
+                        </div>
+                        <div class="record-details">
+                            <span class="record-tag">${record.mood}</span>
+                            <span class="record-tag">${record.water}</span>
+                            ${changeText ? `<span class="record-tag" style="color:${changeColor};background:${changeColor}15">${changeText}</span>` : ''}
+                        </div>
+                        ${record.note ? `<div class="record-note">📝 ${record.note}</div>` : ''}
+                        <div class="record-actions">
+                            <button class="delete-btn" onclick="deleteRecord(${record.id})">删除</button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        // 初始化图表
+        function initChart() {
+            const ctx = document.getElementById('weightChart').getContext('2d');
+            chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: '体重 (kg)',
+                        data: [],
+                        borderColor: '#667eea',
+                        backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 4,
+                        pointBackgroundColor: '#667eea'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false
+                        }
+                    }
+                }
+            });
+            updateChart();
+        }
+
+        // 更新图表
+        function updateChart() {
+            if (!chart) return;
+            
+            const sorted = [...records].sort((a, b) => new Date(a.date) - new Date(b.date));
+            chart.data.labels = sorted.map(r => r.date.slice(5));
+            chart.data.datasets[0].data = sorted.map(r => r.weight);
+            chart.update();
+        }
+
+        // 目标相关
+        function setTarget() {
+            document.getElementById('targetWeightInput').value = targetWeight || '';
+            showModal('targetModal');
+        }
+
+        function saveTarget() {
+            const weight = parseFloat(document.getElementById('targetWeightInput').value);
+            if (weight) {
+                targetWeight = weight;
+                localStorage.setItem('targetWeight', weight);
+                updateTargetDisplay();
+                closeModal('targetModal');
+            }
+        }
+
+        function updateTargetDisplay() {
+            const section = document.getElementById('targetSection');
+            if (targetWeight > 0) {
+                section.style.display = 'block';
+                document.getElementById('targetWeightDisplay').textContent = targetWeight + ' kg';
+                
+                if (records.length > 0) {
+                    const sorted = [...records].sort((a, b) => new Date(a.date) - new Date(b.date));
+                    const current = sorted[sorted.length - 1].weight;
+                    const start = sorted[0].weight;
+                    const totalToLose = start - targetWeight;
+                    const lost = start - current;
+                    const progress = totalToLose > 0 ? Math.min(100, Math.max(0, (lost / totalToLose) * 100)) : 0;
+                    document.getElementById('progressFill').style.width = progress + '%';
+                }
+            } else {
+                section.style.display = 'none';
+            }
+        }
+
+        // 成就系统
+        function checkAchievements(weight) {
+            const days = records.length;
+            
+            // 第一天记录
+            if (days === 1) {
+                showAchievement('🌱', '新的开始！', '恭喜你迈出了第一步，坚持就是胜利！');
+                return;
+            }
+
+            // 累计减重
+            const sorted = [...records].sort((a, b) => new Date(a.date) - new Date(b.date));
+            const first = sorted[0].weight;
+            const totalLoss = first - weight;
+
+            if (totalLoss >= 1 && totalLoss < 1.1) {
+                showAchievement('🎉', '减重1公斤！', '太棒了！你已经成功减掉1公斤，继续加油！');
+            } else if (totalLoss >= 3 && totalLoss < 3.1) {
+                showAchievement('🏆', '减重3公斤！', '太厉害了！3公斤达成，你真的很有毅力！');
+            } else if (totalLoss >= 5 && totalLoss < 5.1) {
+                showAchievement('👑', '减重5公斤！', '减肥达人就是你！5公斤达成，太了不起了！');
+            }
+
+            // 连续记录天数
+            if (days === 7) {
+                showAchievement('📅', '坚持一周！', '连续记录7天，好习惯养成中！');
+            } else if (days === 30) {
+                showAchievement('🎊', '坚持一个月！', '整整一个月的坚持，你已经脱胎换骨了！');
+            }
+
+            // 达到目标
+            if (targetWeight > 0 && weight <= targetWeight) {
+                showAchievement('🎯', '目标达成！', '恭喜你达到了目标体重！你真的太棒了！');
+            }
+        }
+
+        function showAchievement(icon, title, desc) {
+            document.getElementById('achievementIcon').textContent = icon;
+            document.getElementById('achievementTitle').textContent = title;
+            document.getElementById('achievementDesc').textContent = desc;
+            setTimeout(() => showModal('achievementModal'), 300);
+        }
+
+        // 导出数据
+        function exportData() {
+            const data = {
+                records: records,
+                targetWeight: targetWeight,
+                exportDate: new Date().toISOString()
+            };
+            const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = '减肥日志备份_' + new Date().toISOString().split('T')[0] + '.json';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // 导入数据
+        function importData() {
+            document.getElementById('importFile').click();
+        }
+
+        function handleImport(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    if (data.records && Array.isArray(data.records)) {
+                        showConfirm('导入数据', '导入会覆盖现有数据，确定继续吗？', () => {
+                            records = data.records;
+                            if (data.targetWeight) {
+                                targetWeight = data.targetWeight;
+                                localStorage.setItem('targetWeight', targetWeight);
+                            }
+                            saveData();
+                            updateStats();
+                            updateRecordsList();
+                            updateChart();
+                            updateTargetDisplay();
+                            alert('导入成功！');
+                        });
+                    } else {
+                        alert('文件格式不正确');
+                    }
+                } catch (err) {
+                    alert('文件解析失败');
+                }
+            };
+            reader.readAsText(file);
+            event.target.value = '';
+        }
+
+        // 清空所有
+        function clearAll() {
+            showConfirm('清空数据', '确定要清空所有记录吗？此操作不可恢复！', () => {
+                records = [];
+                saveData();
+                updateStats();
+                updateRecordsList();
+                updateChart();
+                updateTargetDisplay();
+            });
+        }
+
+        // 保存数据
+        function saveData() {
+            localStorage.setItem('weightRecords', JSON.stringify(records));
+        }
+
+        // 弹窗工具
+        function showModal(id) {
+            document.getElementById(id).classList.add('show');
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('show');
+        }
+
+        // 确认弹窗
+        let confirmCallback = null;
+        function showConfirm(title, message, callback) {
+            document.getElementById('confirmTitle').textContent = title;
+            document.getElementById('confirmMessage').textContent = message;
+            confirmCallback = callback;
+            showModal('confirmModal');
+        }
+
+        document.getElementById('confirmBtn').addEventListener('click', function() {
+            if (confirmCallback) confirmCallback();
+            closeModal('confirmModal');
+            confirmCallback = null;
+        });
+
+        // 点击弹窗外部关闭
+        document.querySelectorAll('.modal').forEach(modal => {
+            modal.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    this.classList.remove('show');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
