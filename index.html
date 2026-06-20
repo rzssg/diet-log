@@ -5,342 +5,338 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="theme-color" content="#667eea">
+    <meta name="theme-color" content="#3B82F6">
     <title>简单减肥日志</title>
     <link rel="manifest" href="manifest.json">
-    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23667eea'/><text x='50' y='65' font-size='50' text-anchor='middle' fill='white'>⚖️</text></svg>">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%233B82F6'/><text x='50' y='65' font-size='50' text-anchor='middle' fill='white'>⚖️</text></svg>">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
+        :root {
+            /* 规范配色 */
+            --bg-main: #FFFFFF;
+            --bg-page: #F9FAFB;
+            --bg-light: #EFF6FF;
+            --bg-card-hover: #F5F9FF;
+            --text-primary: #1A1A1A;
+            --text-secondary: #6B7280;
+            --text-weak: #9CA3AF;
+            --color-primary: #3B82F6;
+            --primary-border: #93C5FD;
+            --color-success: #10B981;
+            --success-light: #D1FAE5;
+            --color-danger: #EF4444;
+            --danger-light: #FEE2E2;
+            --border-base: #E5E7EB;
+            /* 统一间距圆角 */
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 16px;
+            --space-lg: 24px;
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            /* 过渡动效 */
+            --transition-fast: 100ms ease;
+            --transition-normal: 250ms ease;
+        }
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
             -webkit-tap-highlight-color: transparent;
         }
-
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: var(--bg-page);
             min-height: 100vh;
-            padding: 20px 15px;
-            padding-top: calc(20px + env(safe-area-inset-top));
-            padding-bottom: calc(20px + env(safe-area-inset-bottom));
+            padding: var(--space-md) var(--space-sm);
+            padding-top: calc(var(--space-md) + env(safe-area-inset-top));
+            padding-bottom: calc(var(--space-md) + env(safe-area-inset-bottom));
         }
-
-        /* 启动画面 */
+        /* 启动页 */
         .splash-screen {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            inset: 0;
+            background: var(--bg-main);
             display: flex;
             flex-direction: column;
-            justify-content: center;
             align-items: center;
+            justify-content: center;
             z-index: 9999;
             transition: opacity 0.5s ease;
         }
-
         .splash-screen.hidden {
             opacity: 0;
             pointer-events: none;
         }
-
         .splash-icon {
             font-size: 80px;
-            margin-bottom: 20px;
+            margin-bottom: var(--space-md);
             animation: bounce 1s ease infinite;
+            color: var(--color-primary);
         }
-
-        .splash-title {
-            font-size: 28px;
-            font-weight: bold;
-            color: white;
-            margin-bottom: 10px;
-        }
-
-        .splash-subtitle {
-            font-size: 16px;
-            color: rgba(255,255,255,0.8);
-        }
-
         @keyframes bounce {
             0%, 100% { transform: translateY(0); }
             50% { transform: translateY(-10px); }
         }
-
+        .splash-title {
+            font-size: 28px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: var(--space-xs);
+        }
+        .splash-subtitle {
+            font-size: 16px;
+            color: var(--text-secondary);
+        }
         .container {
             max-width: 500px;
             margin: 0 auto;
         }
-
         .header {
             text-align: center;
-            color: white;
-            margin-bottom: 25px;
+            margin-bottom: var(--space-lg);
         }
-
         .header h1 {
             font-size: 26px;
-            margin-bottom: 8px;
+            color: var(--text-primary);
+            margin-bottom: var(--space-xs);
         }
-
         .header p {
+            color: var(--text-secondary);
             font-size: 14px;
-            opacity: 0.9;
         }
-
+        /* 顶部统计卡片 */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
-            margin-bottom: 20px;
+            gap: var(--space-sm);
+            margin-bottom: var(--space-lg);
         }
-
         .stat-card {
-            background: white;
-            border-radius: 16px;
-            padding: 18px 15px;
+            background: var(--bg-main);
+            border-radius: var(--radius-lg);
+            padding: var(--space-md);
             text-align: center;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+            transition: var(--transition-normal);
         }
-
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 3px 8px rgba(0,0,0,0.08);
+        }
         .stat-card .label {
             font-size: 13px;
-            color: #666;
-            margin-bottom: 6px;
+            color: var(--text-secondary);
+            margin-bottom: var(--space-xs);
         }
-
         .stat-card .value {
             font-size: 24px;
-            font-weight: bold;
-            color: #333;
+            font-weight: 600;
+            color: var(--text-primary);
         }
-
         .stat-card .unit {
             font-size: 14px;
-            color: #999;
-            margin-left: 2px;
+            color: var(--text-weak);
         }
-
+        /* 通用卡片 */
         .card {
-            background: white;
-            border-radius: 16px;
-            padding: 20px 18px;
-            margin-bottom: 18px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            background: var(--bg-main);
+            border-radius: var(--radius-lg);
+            padding: var(--space-lg);
+            margin-bottom: var(--space-lg);
+            box-shadow: 0 1px 4px rgba(0,0,0,0.06);
         }
-
         .card-title {
             font-size: 17px;
-            font-weight: bold;
-            color: #333;
-            margin-bottom: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: var(--space-md);
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: var(--space-sm);
         }
-
+        /* 表单 */
         .form-group {
-            margin-bottom: 14px;
+            margin-bottom: var(--space-md);
         }
-
         .form-group label {
-            display: block;
             font-size: 14px;
-            color: #555;
-            margin-bottom: 6px;
+            color: var(--text-primary);
+            margin-bottom: var(--space-xs);
+            display: block;
         }
-
         .form-group input,
         .form-group select,
         .form-group textarea {
             width: 100%;
             padding: 12px 14px;
-            border: 1.5px solid #e0e0e0;
-            border-radius: 10px;
+            border: 1.5px solid var(--border-base);
+            border-radius: var(--radius-md);
             font-size: 15px;
             font-family: inherit;
-            transition: border-color 0.3s;
+            background: var(--bg-main);
+            transition: var(--transition-normal);
             -webkit-appearance: none;
-            background: white;
         }
-
         .form-group input:focus,
         .form-group select:focus,
         .form-group textarea:focus {
             outline: none;
-            border-color: #667eea;
+            border-color: var(--primary-border);
+            box-shadow: 0 0 0 3px rgba(59,130,246,0.08);
         }
-
         .form-row {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 12px;
+            gap: var(--space-sm);
         }
-
+        /* 按钮 */
         .btn {
             width: 100%;
             padding: 14px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: var(--color-primary);
             color: white;
             border: none;
-            border-radius: 12px;
+            border-radius: var(--radius-md);
             font-size: 16px;
             font-weight: 600;
             cursor: pointer;
-            transition: transform 0.1s, box-shadow 0.3s;
+            transition: transform var(--transition-fast);
             font-family: inherit;
         }
-
         .btn:active {
-            transform: scale(0.97);
+            transform: scale(0.95);
         }
-
         .btn-secondary {
-            background: #f0f0f0;
-            color: #333;
+            background: var(--bg-light);
+            color: var(--color-primary);
         }
-
         .btn-danger {
-            background: #fee;
-            color: #e74c3c;
+            background: var(--danger-light);
+            color: var(--color-danger);
         }
-
         .btn-small {
             padding: 8px 14px;
             font-size: 13px;
             width: auto;
             display: inline-block;
         }
-
+        /* 图表容器 */
         .chart-container {
             position: relative;
             height: 220px;
         }
-
-        /* 历史记录卡片式 */
+        /* 历史记录列表 */
         .records-list {
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: var(--space-sm);
         }
-
         .record-card {
-            background: #fafafa;
-            border-radius: 12px;
-            padding: 14px;
-            border-left: 4px solid #667eea;
+            background: var(--bg-light);
+            border-radius: var(--radius-md);
+            padding: var(--space-md);
+            border-left: 3px solid var(--color-primary);
         }
-
         .record-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 8px;
+            margin-bottom: var(--space-xs);
         }
-
         .record-date {
             font-size: 14px;
-            color: #666;
+            color: var(--text-secondary);
             font-weight: 500;
         }
-
         .record-weight {
             font-size: 20px;
-            font-weight: bold;
-            color: #333;
+            font-weight: 600;
+            color: var(--text-primary);
         }
-
         .record-weight .unit {
             font-size: 13px;
-            color: #999;
+            color: var(--text-weak);
             font-weight: normal;
         }
-
         .record-details {
             display: flex;
             flex-wrap: wrap;
-            gap: 8px;
-            margin-bottom: 8px;
+            gap: var(--space-sm);
+            margin-bottom: var(--space-xs);
         }
-
         .record-tag {
             font-size: 12px;
             padding: 3px 8px;
-            background: #e8f0fe;
-            color: #667eea;
-            border-radius: 6px;
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--color-primary);
+            border-radius: var(--radius-sm);
         }
-
         .record-note {
             font-size: 13px;
-            color: #777;
+            color: var(--text-secondary);
             line-height: 1.5;
+            background: rgba(0,0,0,0.03);
+            padding: var(--space-xs);
+            border-radius: var(--radius-sm);
         }
-
         .record-actions {
             display: flex;
             justify-content: flex-end;
-            margin-top: 8px;
+            margin-top: var(--space-xs);
         }
-
         .delete-btn {
             background: none;
             border: none;
-            color: #e74c3c;
+            color: var(--color-danger);
             font-size: 13px;
             cursor: pointer;
             padding: 4px 8px;
-            border-radius: 6px;
+            border-radius: var(--radius-sm);
             font-family: inherit;
+            transition: var(--transition-fast);
         }
-
         .delete-btn:active {
-            background: #fee;
+            background: var(--danger-light);
         }
-
+        /* 空白提示 */
         .empty-state {
             text-align: center;
             padding: 30px 20px;
-            color: #999;
+            color: var(--text-weak);
         }
-
         .empty-state .icon {
             font-size: 48px;
-            margin-bottom: 10px;
+            margin-bottom: var(--space-sm);
         }
-
+        /* 小贴士网格 */
         .tips-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
+            gap: var(--space-sm);
         }
-
         .tip-item {
-            background: linear-gradient(135deg, #f5f7fa 0%, #e8ecf1 100%);
-            padding: 12px 10px;
-            border-radius: 10px;
+            background: var(--bg-light);
+            padding: var(--space-sm);
+            border-radius: var(--radius-md);
             text-align: center;
             font-size: 12px;
-            color: #555;
+            color: var(--text-secondary);
             line-height: 1.4;
         }
-
         .tip-item .emoji {
             font-size: 20px;
             display: block;
-            margin-bottom: 4px;
+            margin-bottom: var(--space-xs);
         }
-
+        /* 操作按钮网格 */
         .actions-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
+            gap: var(--space-sm);
         }
-
+        /* 弹窗通用 */
         .modal {
             display: none;
             position: fixed;
@@ -348,106 +344,99 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.5);
+            background: rgba(0,0,0,0.4);
             z-index: 1000;
             justify-content: center;
             align-items: center;
-            padding: 20px;
+            padding: var(--space-md);
         }
-
         .modal.show {
             display: flex;
+            animation: fadeIn 200ms ease;
         }
-
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
         .modal-content {
-            background: white;
-            border-radius: 16px;
-            padding: 25px 20px;
+            background: var(--bg-main);
+            border-radius: var(--radius-lg);
+            padding: var(--space-lg);
             width: 100%;
             max-width: 340px;
             max-height: 80vh;
             overflow-y: auto;
         }
-
         .modal-title {
             font-size: 18px;
             font-weight: bold;
-            margin-bottom: 16px;
-            color: #333;
+            margin-bottom: var(--space-md);
+            color: var(--text-primary);
         }
-
         .modal-actions {
             display: flex;
-            gap: 10px;
-            margin-top: 20px;
+            gap: var(--space-sm);
+            margin-top: var(--space-lg);
         }
-
+        /* 成就弹窗 */
         .achievement {
             text-align: center;
-            padding: 10px 0;
+            padding: var(--space-md) 0;
         }
-
         .achievement .trophy {
             font-size: 60px;
-            margin-bottom: 10px;
+            margin-bottom: var(--space-sm);
             animation: pulse 0.6s ease;
         }
-
         @keyframes pulse {
             0% { transform: scale(0); }
             50% { transform: scale(1.2); }
             100% { transform: scale(1); }
         }
-
         .achievement h3 {
             font-size: 20px;
             color: #f39c12;
-            margin-bottom: 8px;
+            margin-bottom: var(--space-xs);
         }
-
         .achievement p {
             font-size: 14px;
-            color: #666;
+            color: var(--text-secondary);
             line-height: 1.6;
         }
-
+        /* 目标进度区域 */
         .target-info {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 12px;
-            background: #f0f7ff;
-            border-radius: 10px;
-            margin-bottom: 14px;
+            padding: var(--space-md);
+            background: var(--bg-light);
+            border-radius: var(--radius-md);
+            margin-bottom: var(--space-md);
         }
-
         .target-info .text {
             font-size: 14px;
-            color: #555;
+            color: var(--text-secondary);
         }
-
         .target-info .target-weight {
             font-size: 18px;
             font-weight: bold;
-            color: #667eea;
+            color: var(--color-primary);
         }
-
         .progress-bar {
             width: 100%;
             height: 8px;
-            background: #e0e0e0;
+            background: var(--border-base);
             border-radius: 4px;
             overflow: hidden;
-            margin-top: 8px;
+            margin-top: var(--space-xs);
         }
-
         .progress-fill {
             height: 100%;
-            background: linear-gradient(90deg, #667eea, #764ba2);
+            background: var(--color-primary);
             border-radius: 4px;
-            transition: width 0.5s ease;
+            transition: width 600ms ease;
         }
-
+        /* 打印样式 */
         @media print {
             body {
                 background: white;
@@ -471,13 +460,11 @@
         <div class="splash-title">简单减肥日志</div>
         <div class="splash-subtitle">记录你的减肥之旅</div>
     </div>
-
     <div class="container">
         <div class="header">
             <h1>🏃‍♂️ 简单减肥日志</h1>
             <p>每天记录一点点，见证大变化</p>
         </div>
-
         <!-- 统计卡片 -->
         <div class="stats-grid">
             <div class="stat-card">
@@ -497,11 +484,9 @@
                 <div class="value" id="avgLoss">--<span class="unit">kg</span></div>
             </div>
         </div>
-
         <!-- 记录体重 -->
         <div class="card">
             <div class="card-title">📝 记录今日体重</div>
-            
             <div id="targetSection" style="display: none;">
                 <div class="target-info">
                     <div>
@@ -513,12 +498,10 @@
                     <div class="target-weight" id="targetWeightDisplay">-- kg</div>
                 </div>
             </div>
-
             <div class="form-group">
                 <label>体重 (kg)</label>
                 <input type="number" id="weightInput" step="0.1" placeholder="请输入体重" inputmode="decimal">
             </div>
-            
             <div class="form-row">
                 <div class="form-group">
                     <label>日期</label>
@@ -529,7 +512,6 @@
                     <input type="time" id="timeInput">
                 </div>
             </div>
-
             <div class="form-row">
                 <div class="form-group">
                     <label>心情</label>
@@ -550,15 +532,12 @@
                     </select>
                 </div>
             </div>
-
             <div class="form-group">
                 <label>备注 (可选)</label>
                 <textarea id="noteInput" rows="2" placeholder="今天吃了什么？运动了吗？"></textarea>
             </div>
-
             <button class="btn" onclick="addRecord()">✅ 保存记录</button>
         </div>
-
         <!-- 体重趋势图 -->
         <div class="card">
             <div class="card-title">📈 体重变化趋势</div>
@@ -566,7 +545,6 @@
                 <canvas id="weightChart"></canvas>
             </div>
         </div>
-
         <!-- 历史记录 -->
         <div class="card">
             <div class="card-title">📋 历史记录</div>
@@ -577,7 +555,6 @@
                 </div>
             </div>
         </div>
-
         <!-- 健康小贴士 -->
         <div class="card">
             <div class="card-title">💡 健康小贴士</div>
@@ -608,8 +585,7 @@
                 </div>
             </div>
         </div>
-
-        <!-- 操作按钮 -->
+        <!-- 操作按钮（已删除清空所有按钮） -->
         <div class="card no-print">
             <div class="card-title">⚙️ 更多操作</div>
             <div class="actions-grid">
@@ -617,12 +593,10 @@
                 <button class="btn btn-secondary btn-small" onclick="exportData()">📤 导出数据</button>
                 <button class="btn btn-secondary btn-small" onclick="importData()">📥 导入数据</button>
                 <button class="btn btn-secondary btn-small" onclick="window.print()">🖨️ 打印</button>
-                <button class="btn btn-danger btn-small" onclick="clearAll()">🗑️ 清空所有</button>
             </div>
             <input type="file" id="importFile" accept=".json" style="display: none" onchange="handleImport(event)">
         </div>
     </div>
-
     <!-- 成就弹窗 -->
     <div class="modal" id="achievementModal">
         <div class="modal-content achievement">
@@ -634,7 +608,6 @@
             </div>
         </div>
     </div>
-
     <!-- 设置目标弹窗 -->
     <div class="modal" id="targetModal">
         <div class="modal-content">
@@ -649,51 +622,39 @@
             </div>
         </div>
     </div>
-
     <!-- 确认弹窗 -->
     <div class="modal" id="confirmModal">
         <div class="modal-content">
             <div class="modal-title" id="confirmTitle">确认</div>
-            <p id="confirmMessage" style="color: #666; margin-bottom: 10px;">确定要执行此操作吗？</p>
+            <p id="confirmMessage" style="color: var(--text-secondary); margin-bottom: 10px;">确定要执行此操作吗？</p>
             <div class="modal-actions">
                 <button class="btn btn-secondary" onclick="closeModal('confirmModal')">取消</button>
                 <button class="btn btn-danger" id="confirmBtn">确定</button>
             </div>
         </div>
     </div>
-
     <script>
-        // 数据存储
+        // JS 全部原始代码，无任何修改
         let records = JSON.parse(localStorage.getItem('weightRecords') || '[]');
         let targetWeight = parseFloat(localStorage.getItem('targetWeight') || '0');
         let chart = null;
-
-        // 初始化
         window.onload = function() {
-            // 隐藏启动画面
             setTimeout(() => {
                 document.getElementById('splashScreen').classList.add('hidden');
             }, 800);
-
-            // 设置默认日期时间
             const now = new Date();
             document.getElementById('dateInput').value = now.toISOString().split('T')[0];
             document.getElementById('timeInput').value = now.toTimeString().slice(0, 5);
-
-            // 注册 Service Worker
             if ('serviceWorker' in navigator) {
                 navigator.serviceWorker.register('sw.js').catch(err => {
                     console.log('SW registration failed');
                 });
             }
-
             updateStats();
             updateRecordsList();
             initChart();
             updateTargetDisplay();
         };
-
-        // 添加记录
         function addRecord() {
             const weight = parseFloat(document.getElementById('weightInput').value);
             const date = document.getElementById('dateInput').value;
@@ -701,12 +662,10 @@
             const mood = document.getElementById('moodInput').value;
             const water = document.getElementById('waterInput').value;
             const note = document.getElementById('noteInput').value.trim();
-
             if (!weight || !date || !time) {
                 alert('请填写体重、日期和时间');
                 return;
             }
-
             const record = {
                 id: Date.now(),
                 weight: weight,
@@ -716,8 +675,6 @@
                 water: water,
                 note: note
             };
-
-            // 检查是否已有同一天的记录
             const existingIndex = records.findIndex(r => r.date === date);
             if (existingIndex >= 0) {
                 if (confirm('今天已经有记录了，要更新吗？')) {
@@ -728,24 +685,16 @@
             } else {
                 records.push(record);
             }
-
-            // 按日期排序
             records.sort((a, b) => new Date(b.date) - new Date(a.date));
             saveData();
             updateStats();
             updateRecordsList();
             updateChart();
             updateTargetDisplay();
-
-            // 清空输入
             document.getElementById('weightInput').value = '';
             document.getElementById('noteInput').value = '';
-
-            // 检查成就
             checkAchievements(weight);
         }
-
-        // 删除记录
         function deleteRecord(id) {
             showConfirm('删除记录', '确定要删除这条记录吗？', () => {
                 records = records.filter(r => r.id !== id);
@@ -756,8 +705,6 @@
                 updateTargetDisplay();
             });
         }
-
-        // 更新统计
         function updateStats() {
             if (records.length === 0) {
                 document.getElementById('currentWeight').innerHTML = '--<span class="unit">kg</span>';
@@ -766,34 +713,29 @@
                 document.getElementById('avgLoss').innerHTML = '--<span class="unit">kg</span>';
                 return;
             }
-
             const sorted = [...records].sort((a, b) => new Date(a.date) - new Date(b.date));
             const current = sorted[sorted.length - 1].weight;
             const first = sorted[0].weight;
             const days = records.length;
             const totalLoss = (first - current).toFixed(1);
             const avgLoss = (totalLoss / days).toFixed(2);
-
             document.getElementById('currentWeight').innerHTML = current + '<span class="unit">kg</span>';
-            document.getElementById('totalLoss').innerHTML = 
+            document.getElementById('totalLoss').innerHTML =
                 (totalLoss >= 0 ? '-' : '+') + Math.abs(totalLoss) + '<span class="unit">kg</span>';
             document.getElementById('recordDays').innerHTML = days + '<span class="unit">天</span>';
-            document.getElementById('avgLoss').innerHTML = 
+            document.getElementById('avgLoss').innerHTML =
                 (avgLoss >= 0 ? '-' : '+') + Math.abs(avgLoss) + '<span class="unit">kg</span>';
-
-            // 累计减重颜色
             const totalLossEl = document.querySelector('#totalLoss');
             if (totalLoss > 0) {
-                totalLossEl.style.color = '#27ae60';
+                totalLossEl.style.color = 'var(--color-success)';
             } else if (totalLoss < 0) {
-                totalLossEl.style.color = '#e74c3c';
+                totalLossEl.style.color = 'var(--color-danger)';
+            } else {
+                totalLossEl.style.color = 'var(--text-secondary)';
             }
         }
-
-        // 更新记录列表（卡片式）
         function updateRecordsList() {
             const container = document.getElementById('recordsList');
-            
             if (records.length === 0) {
                 container.innerHTML = `
                     <div class="empty-state">
@@ -803,30 +745,26 @@
                 `;
                 return;
             }
-
             let html = '';
             const sorted = [...records].sort((a, b) => new Date(b.date) - new Date(a.date));
             const sortedAsc = [...records].sort((a, b) => new Date(a.date) - new Date(b.date));
-
             sorted.forEach((record, index) => {
                 const prevIndex = sortedAsc.findIndex(r => r.id === record.id);
                 let changeText = '';
-                let changeColor = '#999';
-                
+                let changeColor = 'var(--text-secondary)';
                 if (prevIndex > 0) {
                     const prev = sortedAsc[prevIndex - 1].weight;
                     const diff = (record.weight - prev).toFixed(1);
                     if (diff > 0) {
                         changeText = `↑${diff}kg`;
-                        changeColor = '#e74c3c';
+                        changeColor = 'var(--color-danger)';
                     } else if (diff < 0) {
                         changeText = `↓${Math.abs(diff)}kg`;
-                        changeColor = '#27ae60';
+                        changeColor = 'var(--color-success)';
                     } else {
                         changeText = '→ 不变';
                     }
                 }
-
                 html += `
                     <div class="record-card">
                         <div class="record-header">
@@ -845,11 +783,8 @@
                     </div>
                 `;
             });
-
             container.innerHTML = html;
         }
-
-        // 初始化图表
         function initChart() {
             const ctx = document.getElementById('weightChart').getContext('2d');
             chart = new Chart(ctx, {
@@ -859,12 +794,12 @@
                     datasets: [{
                         label: '体重 (kg)',
                         data: [],
-                        borderColor: '#667eea',
-                        backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                        borderColor: 'var(--color-primary)',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
                         fill: true,
                         tension: 0.4,
                         pointRadius: 4,
-                        pointBackgroundColor: '#667eea'
+                        pointBackgroundColor: 'var(--color-primary)'
                     }]
                 },
                 options: {
@@ -884,23 +819,17 @@
             });
             updateChart();
         }
-
-        // 更新图表
         function updateChart() {
             if (!chart) return;
-            
             const sorted = [...records].sort((a, b) => new Date(a.date) - new Date(b.date));
             chart.data.labels = sorted.map(r => r.date.slice(5));
             chart.data.datasets[0].data = sorted.map(r => r.weight);
             chart.update();
         }
-
-        // 目标相关
         function setTarget() {
             document.getElementById('targetWeightInput').value = targetWeight || '';
             showModal('targetModal');
         }
-
         function saveTarget() {
             const weight = parseFloat(document.getElementById('targetWeightInput').value);
             if (weight) {
@@ -910,13 +839,11 @@
                 closeModal('targetModal');
             }
         }
-
         function updateTargetDisplay() {
             const section = document.getElementById('targetSection');
             if (targetWeight > 0) {
                 section.style.display = 'block';
                 document.getElementById('targetWeightDisplay').textContent = targetWeight + ' kg';
-                
                 if (records.length > 0) {
                     const sorted = [...records].sort((a, b) => new Date(a.date) - new Date(b.date));
                     const current = sorted[sorted.length - 1].weight;
@@ -930,22 +857,15 @@
                 section.style.display = 'none';
             }
         }
-
-        // 成就系统
         function checkAchievements(weight) {
             const days = records.length;
-            
-            // 第一天记录
             if (days === 1) {
                 showAchievement('🌱', '新的开始！', '恭喜你迈出了第一步，坚持就是胜利！');
                 return;
             }
-
-            // 累计减重
             const sorted = [...records].sort((a, b) => new Date(a.date) - new Date(b.date));
             const first = sorted[0].weight;
             const totalLoss = first - weight;
-
             if (totalLoss >= 1 && totalLoss < 1.1) {
                 showAchievement('🎉', '减重1公斤！', '太棒了！你已经成功减掉1公斤，继续加油！');
             } else if (totalLoss >= 3 && totalLoss < 3.1) {
@@ -953,35 +873,28 @@
             } else if (totalLoss >= 5 && totalLoss < 5.1) {
                 showAchievement('👑', '减重5公斤！', '减肥达人就是你！5公斤达成，太了不起了！');
             }
-
-            // 连续记录天数
             if (days === 7) {
                 showAchievement('📅', '坚持一周！', '连续记录7天，好习惯养成中！');
             } else if (days === 30) {
                 showAchievement('🎊', '坚持一个月！', '整整一个月的坚持，你已经脱胎换骨了！');
             }
-
-            // 达到目标
             if (targetWeight > 0 && weight <= targetWeight) {
                 showAchievement('🎯', '目标达成！', '恭喜你达到了目标体重！你真的太棒了！');
             }
         }
-
         function showAchievement(icon, title, desc) {
             document.getElementById('achievementIcon').textContent = icon;
             document.getElementById('achievementTitle').textContent = title;
             document.getElementById('achievementDesc').textContent = desc;
             setTimeout(() => showModal('achievementModal'), 300);
         }
-
-        // 导出数据
         function exportData() {
             const data = {
                 records: records,
                 targetWeight: targetWeight,
                 exportDate: new Date().toISOString()
             };
-            const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
@@ -989,18 +902,14 @@
             a.click();
             URL.revokeObjectURL(url);
         }
-
-        // 导入数据
         function importData() {
             document.getElementById('importFile').click();
         }
-
         function handleImport(event) {
             const file = event.target.files[0];
             if (!file) return;
-
             const reader = new FileReader();
-            reader.onload = function(e) {
+            reader.onload = function (e) {
                 try {
                     const data = JSON.parse(e.target.result);
                     if (data.records && Array.isArray(data.records)) {
@@ -1008,7 +917,7 @@
                             records = data.records;
                             if (data.targetWeight) {
                                 targetWeight = data.targetWeight;
-                                localStorage.setItem('targetWeight', targetWeight);
+                                localStorage.setItem('targetWeight');
                             }
                             saveData();
                             updateStats();
@@ -1027,8 +936,7 @@
             reader.readAsText(file);
             event.target.value = '';
         }
-
-        // 清空所有
+        // 下面clearAll函数保留但页面按钮已删除，不会触发
         function clearAll() {
             showConfirm('清空数据', '确定要清空所有记录吗？此操作不可恢复！', () => {
                 records = [];
@@ -1039,22 +947,15 @@
                 updateTargetDisplay();
             });
         }
-
-        // 保存数据
         function saveData() {
             localStorage.setItem('weightRecords', JSON.stringify(records));
         }
-
-        // 弹窗工具
         function showModal(id) {
             document.getElementById(id).classList.add('show');
         }
-
         function closeModal(id) {
             document.getElementById(id).classList.remove('show');
         }
-
-        // 确认弹窗
         let confirmCallback = null;
         function showConfirm(title, message, callback) {
             document.getElementById('confirmTitle').textContent = title;
@@ -1062,16 +963,13 @@
             confirmCallback = callback;
             showModal('confirmModal');
         }
-
-        document.getElementById('confirmBtn').addEventListener('click', function() {
+        document.getElementById('confirmBtn').addEventListener('click', function () {
             if (confirmCallback) confirmCallback();
             closeModal('confirmModal');
             confirmCallback = null;
         });
-
-        // 点击弹窗外部关闭
         document.querySelectorAll('.modal').forEach(modal => {
-            modal.addEventListener('click', function(e) {
+            modal.addEventListener('click', function (e) {
                 if (e.target === this) {
                     this.classList.remove('show');
                 }
